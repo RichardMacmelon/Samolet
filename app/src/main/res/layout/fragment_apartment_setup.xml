@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ApartmentSetupFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <Button
+        android:id="@+id/roomButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="28dp"
+        android:text="@string/firstRoom"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/kitchenButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="28dp"
+        android:text="@string/kitchen"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/roomButton" />
+
+    <Button
+        android:id="@+id/сorridorButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="28dp"
+        android:text="@string/Corridor"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/kitchenButton" />
+
+    <Button
+        android:id="@+id/bathroomButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="28dp"
+        android:text="@string/bathroom"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/сorridorButton" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

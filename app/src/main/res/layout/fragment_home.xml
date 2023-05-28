@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".HomeFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="137dp"
+            android:layout_height="138dp"
+            android:layout_margin="28dp"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_margin="28dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/street"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="@+id/imageView"
+            app:layout_constraintStart_toStartOf="@+id/imageView"
+            app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="137dp"
+            android:layout_height="138dp"
+            android:layout_margin="28dp"
+            android:background="@null"
+            android:src="@drawable/add_business"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/imageView"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>
