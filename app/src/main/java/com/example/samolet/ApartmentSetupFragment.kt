@@ -5,6 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
+import com.example.samolet.databinding.FragmentApartmentSetupBinding
+import com.example.samolet.databinding.FragmentMethodBinding
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -29,12 +33,44 @@ class ApartmentSetupFragment : Fragment() {
         }
     }
 
+    private var _binding : FragmentApartmentSetupBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_apartment_setup, container, false)
+        _binding = FragmentApartmentSetupBinding.inflate(inflater)
+
+        binding.roomButton.setOnClickListener {
+            parentFragmentManager.commit {
+                replace<CharacteristicFragment>(R.id.fragment_container)
+                addToBackStack(ApartmentSetupFragment::class.java.simpleName)
+            }
+        }
+
+        binding.kitchenButton.setOnClickListener {
+            parentFragmentManager.commit {
+                replace<CharacteristicFragment>(R.id.fragment_container)
+                addToBackStack(ApartmentSetupFragment::class.java.simpleName)
+            }
+        }
+
+        binding.corridorButton.setOnClickListener {
+            parentFragmentManager.commit {
+                replace<CharacteristicFragment>(R.id.fragment_container)
+                addToBackStack(ApartmentSetupFragment::class.java.simpleName)
+            }
+        }
+
+        binding.bathroomButton.setOnClickListener {
+            parentFragmentManager.commit {
+                replace<CharacteristicFragment>(R.id.fragment_container)
+                addToBackStack(ApartmentSetupFragment::class.java.simpleName)
+            }
+        }
+        return binding.root
     }
 
     companion object {

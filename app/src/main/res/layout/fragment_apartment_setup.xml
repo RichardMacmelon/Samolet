@@ -30,7 +30,7 @@
         app:layout_constraintTop_toBottomOf="@+id/roomButton" />
 
     <Button
-        android:id="@+id/сorridorButton"
+        android:id="@+id/corridorButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="28dp"
@@ -49,6 +49,6 @@
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/сorridorButton" />
+        app:layout_constraintTop_toBottomOf="@+id/corridorButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
