@@ -5,6 +5,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.samolet.databinding.FragmentCharacteristicBinding
+import com.example.samolet.databinding.FragmentMethodBinding
+import okhttp3.*
+import java.io.File
+import java.io.IOException
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -29,12 +34,48 @@ class CharacteristicFragment : Fragment() {
         }
     }
 
+    private var _binding : FragmentCharacteristicBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_characteristic, container, false)
+        _binding = FragmentCharacteristicBinding.inflate(inflater)
+
+        binding.textView9.text = run("https://api.publicapis.org/",tempFile)
+
+        return binding.root
+    }
+
+    fun run(url: String, file: File): String {
+        val body = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("file", file.name, RequestBody.create(MediaType.parse("video/mp4"), file))
+            .build()
+
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url(url)
+            .post(body)
+            .build()
+
+        var answer = "kek"
+
+        try {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    throw IOException("Запрос к серверу не был успешен:")
+                }
+//                answer = JSONObject(response.body()?.string()).get("count").toString()
+                answer = "lol"
+            }
+        } catch (e: IOException) {
+            println("Ошибка подключения: $e");
+        }
+
+        return answer
     }
 
     companion object {

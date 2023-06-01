@@ -1,47 +1,37 @@
 package com.example.samolet
 
+//import com.example.cameraxapp.databinding.ActivityMainBinding
 import android.Manifest
 import android.content.ContentValues
+import android.content.Context
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.StrictMode
 import android.provider.MediaStore
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.ImageCapture
-import androidx.camera.video.Recorder
-import androidx.camera.video.Recording
-import androidx.camera.video.VideoCapture
-import androidx.core.content.ContextCompat
-
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview
+import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.video.FallbackStrategy
-import androidx.camera.video.MediaStoreOutputOptions
-import androidx.camera.video.Quality
-import androidx.camera.video.QualitySelector
-import androidx.camera.video.VideoRecordEvent
+import androidx.camera.video.*
+import androidx.camera.video.VideoCapture
+import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
-import androidx.fragment.app.commit
-import androidx.fragment.app.replace
-import com.example.samolet.R
-//import com.example.cameraxapp.databinding.ActivityMainBinding
 import com.example.samolet.databinding.ActivityMainBinding
+import okhttp3.*
+import org.json.JSONObject
+import java.io.*
 import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
-import java.util.Locale
+import java.util.*
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+
 
 typealias LumaListener = (luma: Double) -> Unit
-
-
 
 class MainActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivityMainBinding
@@ -58,14 +48,19 @@ class MainActivity : AppCompatActivity() {
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+
         if (allPermissionsGranted()) {
             startCamera()
         } else {
             requestPermissions()
         }
 
+        val context: Context = applicationContext
+
         viewBinding.imageCaptureButton.setOnClickListener { takePhoto() }
-        viewBinding.videoCaptureButton.setOnClickListener { captureVideo() }
+        viewBinding.videoCaptureButton.setOnClickListener { captureVideo(context) }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
@@ -108,7 +103,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Implements VideoCapture use case, including start and stop capturing.
-    private fun captureVideo() {
+    private fun captureVideo(context: Context) {
         val videoCapture = this.videoCapture ?: return
 
         viewBinding.videoCaptureButton.isEnabled = false
@@ -161,6 +156,40 @@ class MainActivity : AppCompatActivity() {
                             Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT)
                                 .show()
                             Log.d(TAG, msg)
+
+                            println(recordEvent.outputResults.outputUri)
+                            val uri: Uri = recordEvent.outputResults.outputUri
+
+                            val inputStream = context.contentResolver.openInputStream(uri)
+                            val fileName = getFileName(context, uri)
+
+                            val splitName = splitFileName(fileName)
+                            var tempFile =
+                                File.createTempFile(splitName!![0] + "tmp", splitName!![1])
+                            tempFile = fileName?.let { rename(tempFile, it) }
+                            tempFile.deleteOnExit()
+                            var out: FileOutputStream? = null
+                            try {
+                                out = FileOutputStream(tempFile)
+                            } catch (e: FileNotFoundException) {
+                                e.printStackTrace()
+                            }
+                            if (inputStream != null) {
+                                if (out != null) {
+                                    copy(inputStream, out)
+                                }
+                                inputStream.close()
+                            }
+
+                            if (out != null) {
+                                out.close()
+                            }
+
+                            println(tempFile.absolutePath)
+                            println(tempFile.extension)
+
+                            println(run("https://api.publicapis.org/",tempFile))
+
                         } else {
                             recording?.close()
                             recording = null
@@ -174,6 +203,101 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+    }
+
+    fun run(url: String, file: File): String {
+        val body = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("file", file.name, RequestBody.create(MediaType.parse("video/mp4"), file))
+            .build()
+        
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url(url)
+            .post(body)
+            .build()
+
+        var answer = "kek"
+
+        try {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    throw IOException("Запрос к серверу не был успешен:")
+                }
+//                answer = JSONObject(response.body()?.string()).get("count").toString()
+                answer = "lol"
+            }
+        } catch (e: IOException) {
+            println("Ошибка подключения: $e");
+        }
+
+        return answer
+    }
+
+    private fun splitFileName(fileName: String?): Array<String?>? {
+        var name = fileName
+        var extension = ""
+        val i = fileName?.lastIndexOf(".")
+        if (i != -1) {
+            name = i?.let { fileName?.substring(0, it) }
+            if (fileName != null) {
+                extension = i?.let { fileName.substring(it) }.toString()
+            }
+        }
+        return arrayOf(name, extension)
+    }
+
+    private fun getFileName(context: Context, uri: Uri): String? {
+        var result: String? = null
+//        if (uri.scheme == "content") {
+//            val cursor: Cursor? = context.contentResolver.query(uri, null, null, null, null)
+//            try {
+//                if (cursor != null && cursor.moveToFirst()) {
+//                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+//                }
+//            } catch (e: java.lang.Exception) {
+//                e.printStackTrace()
+//            } finally {
+//                if (cursor != null) {
+//                    cursor.close()
+//                }
+//            }
+//        }
+        if (result == null) {
+            result = uri.path
+            val cut = result!!.lastIndexOf(File.separator)
+            if (cut != -1) {
+                result = result.substring(cut + 1)
+            }
+        }
+        return result
+    }
+
+    private fun rename(file: File?, newName: String): File? {
+        val newFile = File(file?.parent, newName)
+        if (newFile != file) {
+            if (newFile.exists() && newFile.delete()) {
+                Log.d("FileUtil", "Delete old $newName file")
+            }
+            if (file != null) {
+                if (file.renameTo(newFile)) {
+                    Log.d("FileUtil", "Rename file to $newName")
+                }
+            }
+        }
+        return newFile
+    }
+
+    @Throws(IOException::class)
+    private fun copy(input: InputStream, output: OutputStream): Long {
+        var count: Long = 0
+        var n: Int
+        val buffer = ByteArray(1024 * 4)
+        while (-1 !== input.read(buffer).also { n = it }) {
+            output.write(buffer, 0, n)
+            count += n.toLong()
+        }
+        return count
     }
 
     private fun startCamera() {
