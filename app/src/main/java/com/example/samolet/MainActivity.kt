@@ -1,9 +1,11 @@
 package com.example.samolet
 
-//import com.example.cameraxapp.databinding.ActivityMainBinding
 import android.Manifest
+import android.app.Activity
+import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -11,7 +13,9 @@ import android.os.Bundle
 import android.os.StrictMode
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.Button
 import android.widget.Toast
+import android.widget.VideoView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
@@ -21,6 +25,10 @@ import androidx.camera.video.VideoCapture
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.example.samolet.databinding.ActivityMainBinding
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.MultiplePermissionsReport
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import okhttp3.*
 import org.json.JSONObject
 import java.io.*
@@ -43,6 +51,13 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var cameraExecutor: ExecutorService
 
+    private var btn: Button? = null
+    private var videoView: VideoView? = null
+    private val VIDEO_DIRECTORY = "/demonutsVideoooo"
+    private val GALLERY = 1
+    private val CAMERA = 2
+    private val userName = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
@@ -59,47 +74,145 @@ class MainActivity : AppCompatActivity() {
 
         val context: Context = applicationContext
 
-        viewBinding.imageCaptureButton.setOnClickListener { takePhoto() }
+        viewBinding.imageCaptureButton.setOnClickListener { showPictureDialog()}
         viewBinding.videoCaptureButton.setOnClickListener { captureVideo(context) }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
+
     }
 
-    private fun takePhoto() {
-        val imageCapture = imageCapture ?: return
-
-        val name = SimpleDateFormat(FILENAME_FORMAT, Locale.US)
-            .format(System.currentTimeMillis())
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraX-Image")
+    private fun showPictureDialog() {
+        val pictureDialog = AlertDialog.Builder(this)
+        pictureDialog.setTitle("Select Action")
+        val pictureDialogItems = arrayOf("Select video from gallery")
+        pictureDialog.setItems(
+            pictureDialogItems
+        ) { dialog, which ->
+            when (which) {
+                0 -> chooseVideoFromGallary()
             }
         }
+        pictureDialog.show()
+    }
 
-        val outputOptions = ImageCapture.OutputFileOptions
-            .Builder(contentResolver,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                contentValues)
-            .build()
-
-        imageCapture.takePicture(
-            outputOptions,
-            ContextCompat.getMainExecutor(this),
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onError(exc: ImageCaptureException) {
-                    Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
-                }
-
-                override fun
-                        onImageSaved(output: ImageCapture.OutputFileResults){
-                    val msg = "Photo capture succeeded: ${output.savedUri}"
-                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-                    Log.d(TAG, msg)
-                }
-            }
+    fun chooseVideoFromGallary() {
+        val galleryIntent = Intent(
+            Intent.ACTION_PICK,
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
         )
+
+        startActivityForResult(galleryIntent, GALLERY)
+    }
+
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+        Log.d("result", "" + resultCode)
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_CANCELED) {
+            Log.d("what", "cancle")
+            return
+        }
+        if (requestCode == GALLERY) {
+            Log.d("what", "gale")
+            if (data != null) {
+                val contentURI = data.data
+                val selectedVideoPath = getPath(contentURI)
+                if (selectedVideoPath != null) {
+                    Log.d("path", selectedVideoPath)
+                }
+                val context: Context = applicationContext
+                val inputStream = contentURI?.let { context.contentResolver.openInputStream(it) }
+                val fileName = contentURI?.let { getFileName(context, it) }
+
+                val splitName = splitFileName(fileName)
+                var tempFile = File.createTempFile(splitName!![0] + "tmp", splitName!![1])
+                tempFile = fileName?.let { rename(tempFile, it) }
+                tempFile.deleteOnExit()
+                var out: FileOutputStream? = null
+
+                try {
+                    out = FileOutputStream(tempFile)
+                } catch (e: FileNotFoundException) {
+                    e.printStackTrace()
+                }
+
+                if (inputStream != null) {
+                    if (out != null) {
+                        copy(inputStream, out)
+                    }
+                    inputStream.close()
+                }
+
+                if (out != null) {
+                    out.close()
+                }
+
+                val roomId=intent.getStringExtra("Room")
+                println(run("https://a769-188-243-44-63.ngrok-free.app/file-upload?username=username&room=$roomId",tempFile))
+
+            }
+
+        } else if (requestCode == CAMERA) {
+            Log.d("what", "camera")
+            val contentURI = data!!.data
+            val recordedVideoPath = getPath(contentURI)
+            if (recordedVideoPath != null) {
+                Log.d("frrr", recordedVideoPath)
+            }
+
+            videoView!!.setVideoURI(contentURI)
+            videoView!!.requestFocus()
+            videoView!!.start()
+        }
+    }
+
+    fun getPath(uri: Uri?): String? {
+        val projection = arrayOf(MediaStore.Video.Media.DATA)
+        val cursor = contentResolver.query(uri!!, projection, null, null, null)
+        if (cursor != null) {
+            // HERE YOU WILL GET A NULLPOINTER IF CURSOR IS NULL
+            // THIS CAN BE, IF YOU USED OI FILE MANAGER FOR PICKING THE MEDIA
+            val column_index = cursor!!
+                .getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
+            cursor!!.moveToFirst()
+            return cursor!!.getString(column_index)
+        } else
+            return null
+    }
+
+    private fun requestMultiplePermissions() {
+        Dexter.withActivity(this)
+            .withPermissions(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA
+            )
+            .withListener(object : MultiplePermissionsListener {
+                override fun onPermissionsChecked(report: MultiplePermissionsReport) {
+                    // check if all permissions are granted
+                    if (report.areAllPermissionsGranted()) {
+                        Toast.makeText(applicationContext, "All permissions are granted by user!", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                    // check for permanent denial of any permission
+                    if (report.isAnyPermissionPermanentlyDenied) {
+                        // show alert dialog navigating to Settings
+                        //openSettingsDialog()
+                    }
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permissions: MutableList<com.karumi.dexter.listener.PermissionRequest>?,
+                    token: PermissionToken?
+                ) {
+                    if (token != null) {
+                        token.continuePermissionRequest()
+                    }
+                }
+            }).withErrorListener { Toast.makeText(applicationContext, "Some Error! ", Toast.LENGTH_SHORT).show() }
+            .onSameThread()
+            .check()
     }
 
     // Implements VideoCapture use case, including start and stop capturing.
@@ -131,9 +244,11 @@ class MainActivity : AppCompatActivity() {
             .Builder(contentResolver, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
             .setContentValues(contentValues)
             .build()
+
         recording = videoCapture.output
             .prepareRecording(this, mediaStoreOutputOptions)
             .apply {
+
                 if (PermissionChecker.checkSelfPermission(this@MainActivity,
                         Manifest.permission.RECORD_AUDIO) ==
                     PermissionChecker.PERMISSION_GRANTED)
@@ -169,11 +284,13 @@ class MainActivity : AppCompatActivity() {
                             tempFile = fileName?.let { rename(tempFile, it) }
                             tempFile.deleteOnExit()
                             var out: FileOutputStream? = null
+
                             try {
                                 out = FileOutputStream(tempFile)
                             } catch (e: FileNotFoundException) {
                                 e.printStackTrace()
                             }
+
                             if (inputStream != null) {
                                 if (out != null) {
                                     copy(inputStream, out)
@@ -185,10 +302,11 @@ class MainActivity : AppCompatActivity() {
                                 out.close()
                             }
 
-                            println(tempFile.absolutePath)
-                            println(tempFile.extension)
+                            val roomId = intent.getStringExtra("Room")
 
-                            println(run("https://api.publicapis.org/",tempFile))
+
+                            println(roomId)
+                            println(run("https://a769-188-243-44-63.ngrok-free.app/file-upload?username=username&room=$roomId",tempFile))
 
                         } else {
                             recording?.close()
@@ -206,11 +324,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun run(url: String, file: File): String {
+        println(file.name)
         val body = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
-            .addFormDataPart("file", file.name, RequestBody.create(MediaType.parse("video/mp4"), file))
+            .addFormDataPart("file", file.name + ".mp4", RequestBody.create(MediaType.parse("video/mp4"), file))
             .build()
-        
+
         val client = OkHttpClient()
         val request = Request.Builder()
             .url(url)
@@ -222,6 +341,8 @@ class MainActivity : AppCompatActivity() {
         try {
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
+                    println(response.code())
+                    println(response.body()?.string())
                     throw IOException("Запрос к серверу не был успешен:")
                 }
 //                answer = JSONObject(response.body()?.string()).get("count").toString()
@@ -249,20 +370,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getFileName(context: Context, uri: Uri): String? {
         var result: String? = null
-//        if (uri.scheme == "content") {
-//            val cursor: Cursor? = context.contentResolver.query(uri, null, null, null, null)
-//            try {
-//                if (cursor != null && cursor.moveToFirst()) {
-//                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
-//                }
-//            } catch (e: java.lang.Exception) {
-//                e.printStackTrace()
-//            } finally {
-//                if (cursor != null) {
-//                    cursor.close()
-//                }
-//            }
-//        }
+
         if (result == null) {
             result = uri.path
             val cut = result!!.lastIndexOf(File.separator)

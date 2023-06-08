@@ -16,8 +16,8 @@ class StartActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         supportFragmentManager.commit {
-            replace<HomeFragment>(R.id.fragment_container)
-            addToBackStack(HomeFragment::class.java.simpleName)
+            replace<HomeSetupFragment>(R.id.fragment_container)
+            addToBackStack(HomeSetupFragment::class.java.simpleName)
         }
     }
 }

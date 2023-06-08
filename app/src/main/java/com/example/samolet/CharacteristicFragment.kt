@@ -1,6 +1,7 @@
 package com.example.samolet
 
 import android.os.Bundle
+import android.os.StrictMode
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import android.view.ViewGroup
 import com.example.samolet.databinding.FragmentCharacteristicBinding
 import com.example.samolet.databinding.FragmentMethodBinding
 import okhttp3.*
+import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 
@@ -42,23 +44,38 @@ class CharacteristicFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
+
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+
         _binding = FragmentCharacteristicBinding.inflate(inflater)
 
-        binding.textView9.text = run("https://api.publicapis.org/",tempFile)
+        binding.buttonResult.setOnClickListener {
+            binding.textViewResultRoom.text = run("https://a769-188-243-44-63.ngrok-free.app/get-result?username=username&room=1")
+            binding.textViewResultKitchen.text = run("https://a769-188-243-44-63.ngrok-free.app/get-result?username=username&room=2")
+            binding.textViewResultCorridor.text  = run("https://a769-188-243-44-63.ngrok-free.app/get-result?username=username&room=3")
+            binding.textViewResultButtonRoom.text = run("https://a769-188-243-44-63.ngrok-free.app/get-result?username=username&room=4")
+        }
 
         return binding.root
     }
 
-    fun run(url: String, file: File): String {
-        val body = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart("file", file.name, RequestBody.create(MediaType.parse("video/mp4"), file))
-            .build()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+
+    fun run(url: String): String {
+//        val body = MultipartBody.Builder()
+//            .setType(MultipartBody.FORM)
+//            .addFormDataPart("file", file.name, RequestBody.create(MediaType.parse("video/mp4"), file))
+//            .build()
 
         val client = OkHttpClient()
         val request = Request.Builder()
             .url(url)
-            .post(body)
+            .get()
             .build()
 
         var answer = "kek"
@@ -68,8 +85,7 @@ class CharacteristicFragment : Fragment() {
                 if (!response.isSuccessful) {
                     throw IOException("Запрос к серверу не был успешен:")
                 }
-//                answer = JSONObject(response.body()?.string()).get("count").toString()
-                answer = "lol"
+                answer = JSONObject(response.body()?.string()).get("result").toString()
             }
         } catch (e: IOException) {
             println("Ошибка подключения: $e");

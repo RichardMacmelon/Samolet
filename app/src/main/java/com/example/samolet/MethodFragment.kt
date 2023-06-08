@@ -44,15 +44,34 @@ class MethodFragment : Fragment() {
         // Inflate the layout for this fragment
         _binding = FragmentMethodBinding.inflate(inflater)
 
-        binding.buttonByHand.setOnClickListener {
+        binding.buttonResult.setOnClickListener {
             parentFragmentManager.commit {
-                replace<ApartmentSetupFragment>(R.id.fragment_container)
+                replace<CharacteristicFragment>(R.id.fragment_container)
                 addToBackStack(MethodFragment::class.java.simpleName)
             }
         }
 
-        binding.buttonNeruralNetvork.setOnClickListener {
+        binding.buttonRoom.setOnClickListener {
             val intent = Intent(activity, MainActivity::class.java)
+            intent.putExtra("Room","1")
+            startActivity(intent)
+        }
+
+        binding.buttonKitchen.setOnClickListener {
+            val intent = Intent(activity, MainActivity::class.java)
+            intent.putExtra("Room","2")
+            startActivity(intent)
+        }
+
+        binding.buttonCorridor.setOnClickListener {
+            val intent = Intent(activity, MainActivity::class.java)
+            intent.putExtra("Room","3")
+            startActivity(intent)
+        }
+
+        binding.buttonBathroom.setOnClickListener {
+            val intent = Intent(activity, MainActivity::class.java)
+            intent.putExtra("Room","4")
             startActivity(intent)
         }
 

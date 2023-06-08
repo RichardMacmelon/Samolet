@@ -17,7 +17,7 @@
     <string name="floor">Введите этаж:</string>
     <string name="apartmentNumber">Введите номер квартиры:</string>
     <string name="save">Сохранить</string>
-    <string name="question">Каким способом хотите внести информацию о квартире?</string>
+    <string name="question">Выберите часть квартиры, которую хотите снять:</string>
     <string name="neuralNetwork">Нейросеть</string>
     <string name="byHand">Вручную</string>
     <string name="firstRoom">1 комната</string>
@@ -27,4 +27,5 @@
     <string name="take_photo">Сделать фото</string>
     <string name="start_capture">Видео</string>
     <string name="stop_capture">Стоп</string>
+    <string name="update">Обновите результат</string>
 </resources>
