@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/white"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".CharacteristicFragment">
@@ -15,18 +16,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="28dp"
-            android:text="Готовность квартиры:"
+            android:text="Готовность квартиры"
             android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
             android:id="@+id/textViewRoom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="28dp"
-            android:text="Комната - "
+            android:text="Комната : "
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textViewLogo" />
@@ -45,10 +46,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="28dp"
-            android:text="Кухня - "
+            android:text="Кухня :       "
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textViewRoom" />
+            app:layout_constraintTop_toBottomOf="@+id/textViewResultRoom" />
 
         <TextView
             android:id="@+id/textViewResultKitchen"
@@ -64,12 +65,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="28dp"
-            android:text="Коридор - "
+            android:text="Коридор : "
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textViewKitchen" />
+            app:layout_constraintTop_toBottomOf="@+id/textViewResultKitchen" />
 
         <TextView
+
             android:id="@+id/textViewResultCorridor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -83,13 +85,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="28dp"
-            android:layout_marginTop="28dp"
-            android:text="Cанузел - "
+            android:layout_marginStart="28dp"
+            android:text="Cанузел :  "
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textViewCorridor" />
+            app:layout_constraintTop_toBottomOf="@+id/textViewResultCorridor" />
 
         <TextView
+
             android:id="@+id/textViewResultButtonRoom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -100,9 +103,10 @@
 
         <Button
             android:id="@+id/buttonResult"
-            android:layout_margin="28dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="28dp"
+            android:layout_marginTop="48dp"
             android:text="Обновить результат"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
