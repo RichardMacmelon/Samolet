@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 val roomId=intent.getStringExtra("Room")
-                println(run("https://a769-188-243-44-63.ngrok-free.app/file-upload?username=username&room=$roomId",tempFile))
+                println(run("https://397d-188-243-44-63.ngrok-free.app/file-upload?username=username&room=$roomId",tempFile))
 
             }
 
@@ -306,7 +306,7 @@ class MainActivity : AppCompatActivity() {
 
 
                             println(roomId)
-                            println(run("https://f640-188-243-44-63.ngrok-free.app/file-upload?username=username&room=$roomId",tempFile))
+                            println(run("https://397d-188-243-44-63.ngrok-free.app/file-upload?username=username&room=$roomId",tempFile))
 
                         } else {
                             recording?.close()

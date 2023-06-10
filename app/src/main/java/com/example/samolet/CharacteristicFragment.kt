@@ -51,10 +51,10 @@ class CharacteristicFragment : Fragment() {
         _binding = FragmentCharacteristicBinding.inflate(inflater)
 
         binding.buttonResult.setOnClickListener {
-            binding.textViewResultRoom.text = run("https://f640-188-243-44-63.ngrok-free.app/get-result?username=username&room=1")
-            binding.textViewResultKitchen.text = run("https://f640-188-243-44-63.ngrok-free.app/get-result?username=username&room=2")
-            binding.textViewResultCorridor.text  = run("https://f640-188-243-44-63.ngrok-free.app/get-result?username=username&room=3")
-            binding.textViewResultButtonRoom.text = run("https://f640-188-243-44-63.ngrok-free.app/get-result?username=username&room=4")
+            binding.textViewResultRoom.text = run("https://397d-188-243-44-63.ngrok-free.app/get-result?username=username&room=1")
+            binding.textViewResultKitchen.text = run("https://397d-188-243-44-63.ngrok-free.app/get-result?username=username&room=2")
+            binding.textViewResultCorridor.text  = run("https://397d-188-243-44-63.ngrok-free.app/get-result?username=username&room=3")
+            binding.textViewResultButtonRoom.text = run("https://397d-188-243-44-63.ngrok-free.app/get-result?username=username&room=4")
         }
 
         return binding.root
